@@ -1,0 +1,313 @@
+openapi: 3.0.3
+info:
+  title: FarmApp API (MVP)
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    FarmIdHeader:
+      name: X-Farm-Id
+      in: header
+      required: true
+      schema: { type: string }
+security:
+  - bearerAuth: []
+paths:
+  /auth/otp/request:
+    post:
+      summary: Request local SMS OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string, description: E.164 }
+                purpose: { type: string, enum: [login, invite], default: login }
+      responses:
+        '200': { description: OTP queued }
+  /auth/otp/verify:
+    post:
+      summary: Verify OTP and issue tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                code: { type: string }
+      responses:
+        '200':
+          description: JWT tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  refreshToken: { type: string }
+                  newUser: { type: boolean }
+  /farms:
+    get:
+      summary: List farms for current user
+      responses: { '200': { description: OK } }
+  /farms/{farmId}/members:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    get:
+      summary: List farm members
+      responses: { '200': { description: OK } }
+    post:
+      summary: Invite/add member (Owner or Super-Admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                role: { type: string, enum: [OWNER, ADMIN, WORKER, VET] }
+      responses: { '201': { description: Created } }
+  /farms/{farmId}/animals:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    get:
+      summary: List/search animals
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string, description: search by tag or rfid }
+        - in: query
+          name: since
+          schema: { type: string, format: date-time }
+      responses: { '200': { description: OK } }
+    post:
+      summary: Create animal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tagNumber: { type: string }
+                rfid: { type: string, nullable: true }
+                type: { type: string, enum: [RAM, EWE, LAMB] }
+                sex: { type: string, enum: [MALE, FEMALE] }
+                dob: { type: string, format: date }
+      responses: { '201': { description: Created } }
+  /farms/{farmId}/breeding/events:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    post:
+      summary: Create breeding event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eweId: { type: string }
+                type:
+                  type: string
+                  enum: [SPONGE_INSERT, SPONGE_REMOVE, HORMONE, INS1, INS2, CHECK1, CHECK2, PREG_CONFIRMED, LAMBING, LOSS]
+                date: { type: string, format: date-time }
+                payload: { type: object, additionalProperties: true }
+      responses:
+        '201': { description: Created }
+  /farms/{farmId}/health/events:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    post:
+      summary: Create health or treatment event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                animalId: { type: string }
+                type: { type: string, enum: [DIAGNOSIS, TREATMENT, FOLLOW_UP, RECOVERY, DEATH] }
+                date: { type: string, format: date-time }
+                payload: { type: object }
+      responses:
+        '201': { description: Created }
+  /farms/{farmId}/weights:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    post:
+      summary: Add weight record(s)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entries:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      animalId: { type: string }
+                      date: { type: string, format: date-time }
+                      kg: { type: number }
+      responses:
+        '201': { description: Created }
+  /farms/{farmId}/milk/yields:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    post:
+      summary: Add milk yield
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                animalId: { type: string }
+                at: { type: string, format: date-time }
+                liters: { type: number }
+      responses:
+        '201': { description: Created }
+  /farms/{farmId}/sales/animals:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    post:
+      summary: Record animal sale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                animalId: { type: string }
+                date: { type: string, format: date }
+                type: { type: string, enum: [LIVE, SLAUGHTER, CULL] }
+                weightKg: { type: number, nullable: true }
+                price: { type: number }
+                buyerName: { type: string, nullable: true }
+      responses:
+        '201': { description: Created }
+  /farms/{farmId}/sales/milk:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    post:
+      summary: Record milk sale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date: { type: string, format: date }
+                volumeLiters: { type: number }
+                pricePerLiter: { type: number }
+                buyerName: { type: string, nullable: true }
+      responses:
+        '201': { description: Created }
+  /farms/{farmId}/sync/pull:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+      - in: query
+        name: since
+        schema: { type: string, format: date-time }
+    get:
+      summary: Pull delta since timestamp
+      responses: { '200': { description: OK } }
+  /farms/{farmId}/sync/push:
+    parameters:
+      - in: path
+        name: farmId
+        required: true
+        schema: { type: string }
+      - $ref: '#/components/parameters/FarmIdHeader'
+    post:
+      summary: Push batched outbox changes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                changes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      entity: { type: string }
+                      op: { type: string, enum: [CREATE, UPDATE, DELETE] }
+                      data: { type: object }
+                      clientMutationId: { type: string }
+      responses:
+        '200': { description: Accepted }
+  /reports/export:
+    get:
+      summary: Export CSV/XLSX by type & date range
+      parameters:
+        - in: query
+          name: type
+          schema: { type: string, enum: [ANIMALS, EVENTS, SALES, KPIS, COSTS] }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses: { '200': { description: Stream } }
+  /notifications/inbox:
+    get:
+      summary: List in-app notifications
+      responses: { '200': { description: OK } }

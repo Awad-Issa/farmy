@@ -1,0 +1,89 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "name": "Name",
+    "description": "Description",
+    "submit": "Submit"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "phone": "Phone Number",
+    "password": "Password",
+    "rememberMe": "Remember Me",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "loginTitle": "Welcome to Farmy",
+    "loginSubtitle": "Enter your credentials to access your farm",
+    "phoneRequired": "Phone number is required",
+    "passwordRequired": "Password is required",
+    "invalidCredentials": "Invalid phone or password"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "animals": "Animals",
+    "breeding": "Breeding",
+    "health": "Health",
+    "weights": "Weights",
+    "feeding": "Feeding",
+    "milk": "Milk",
+    "sales": "Sales",
+    "inventory": "Inventory",
+    "insights": "Insights",
+    "reports": "Reports",
+    "settings": "Settings",
+    "ops": "Operations"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "totalAnimals": "Total Animals",
+    "activeBreeding": "Active Breeding",
+    "healthEvents": "Health Events",
+    "recentActivity": "Recent Activity"
+  },
+  "animals": {
+    "title": "Animals",
+    "addAnimal": "Add Animal",
+    "animalDetails": "Animal Details",
+    "tagNumber": "Tag Number",
+    "rfid": "RFID",
+    "type": "Type",
+    "breed": "Breed",
+    "gender": "Gender",
+    "birthDate": "Birth Date",
+    "status": "Status",
+    "tabs": {
+      "details": "Details",
+      "breeding": "Breeding",
+      "health": "Health",
+      "weight": "Weight",
+      "milk": "Milk",
+      "sales": "Sales"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "direction": "Direction",
+    "ltr": "Left to Right",
+    "rtl": "Right to Left",
+    "farm": "Farm Settings",
+    "switchFarm": "Switch Farm"
+  }
+}
+

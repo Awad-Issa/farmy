@@ -1,0 +1,89 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "actions": "الإجراءات",
+    "status": "الحالة",
+    "date": "التاريخ",
+    "name": "الاسم",
+    "description": "الوصف",
+    "submit": "إرسال"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "phone": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "register": "تسجيل",
+    "loginTitle": "مرحباً بك في فارمي",
+    "loginSubtitle": "أدخل بياناتك للوصول إلى مزرعتك",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "passwordRequired": "كلمة المرور مطلوبة",
+    "invalidCredentials": "رقم الهاتف أو كلمة المرور غير صحيحة"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "animals": "الحيوانات",
+    "breeding": "التلقيح",
+    "health": "الصحة",
+    "weights": "الأوزان",
+    "feeding": "التغذية",
+    "milk": "الحليب",
+    "sales": "المبيعات",
+    "inventory": "المخزون",
+    "insights": "الرؤى",
+    "reports": "التقارير",
+    "settings": "الإعدادات",
+    "ops": "العمليات"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحباً بعودتك",
+    "totalAnimals": "إجمالي الحيوانات",
+    "activeBreeding": "التلقيح النشط",
+    "healthEvents": "الأحداث الصحية",
+    "recentActivity": "النشاط الأخير"
+  },
+  "animals": {
+    "title": "الحيوانات",
+    "addAnimal": "إضافة حيوان",
+    "animalDetails": "تفاصيل الحيوان",
+    "tagNumber": "رقم العلامة",
+    "rfid": "الرقاقة الإلكترونية",
+    "type": "النوع",
+    "breed": "السلالة",
+    "gender": "الجنس",
+    "birthDate": "تاريخ الميلاد",
+    "status": "الحالة",
+    "tabs": {
+      "details": "التفاصيل",
+      "breeding": "التلقيح",
+      "health": "الصحة",
+      "weight": "الوزن",
+      "milk": "الحليب",
+      "sales": "المبيعات"
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "direction": "الاتجاه",
+    "ltr": "من اليسار إلى اليمين",
+    "rtl": "من اليمين إلى اليسار",
+    "farm": "إعدادات المزرعة",
+    "switchFarm": "تبديل المزرعة"
+  }
+}
+
