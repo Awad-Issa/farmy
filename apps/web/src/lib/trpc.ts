@@ -4,9 +4,9 @@
  */
 
 import { createTRPCReact } from '@trpc/react-query';
-import { httpBatchLink, loggerLink } from '@trpc/client';
+import { httpLink, loggerLink } from '@trpc/client';
 import { type AppRouter } from '@farmy/api';
-import SuperJSON from 'superjson';
+import superjson from 'superjson';
 
 // Create typed tRPC React client
 export const trpc = createTRPCReact<AppRouter>();
@@ -22,16 +22,18 @@ function getAuthToken(): string | null {
 /**
  * Get current farm ID from localStorage
  */
-function getCurrentFarmId(): string | null {
+export function getCurrentFarmId(): string | null {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('currentFarmId');
 }
 
 /**
- * Set auth token in localStorage
+ * Set auth token in localStorage and cookies
  */
 export function setAuthToken(token: string) {
   localStorage.setItem('accessToken', token);
+  // Also set in cookie for middleware access
+  document.cookie = `auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
 }
 
 /**
@@ -39,6 +41,8 @@ export function setAuthToken(token: string) {
  */
 export function setRefreshToken(token: string) {
   localStorage.setItem('refreshToken', token);
+  // Also set in cookie
+  document.cookie = `refresh_token=${token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
 }
 
 /**
@@ -64,6 +68,9 @@ export function clearAuth() {
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('currentFarmId');
   localStorage.removeItem('user');
+  // Clear cookies
+  document.cookie = 'auth_token=; path=/; max-age=0';
+  document.cookie = 'refresh_token=; path=/; max-age=0';
 }
 
 /**
@@ -71,14 +78,14 @@ export function clearAuth() {
  */
 export function createTRPCClient() {
   return trpc.createClient({
-    transformer: SuperJSON,
+    // transformer: superjson, // Temporarily disabled to see raw errors
     links: [
       loggerLink({
         enabled: (opts) =>
           process.env.NODE_ENV === 'development' ||
           (opts.direction === 'down' && opts.result instanceof Error),
       }),
-      httpBatchLink({
+      httpLink({
         url: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/trpc`,
         
         // Add custom headers
@@ -142,7 +149,8 @@ export function createTRPCClient() {
               // Refresh failed or no refresh token - redirect to login
               clearAuth();
               if (typeof window !== 'undefined') {
-                window.location.href = '/login';
+                const locale = window.location.pathname.split('/')[1] || 'en';
+                window.location.href = `/${locale}/login`;
               }
             }
 

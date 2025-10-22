@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { trpc } from '@/lib/trpc';
 import { setAuthToken, setRefreshToken, setCurrentFarmId } from '@/lib/trpc';
@@ -14,13 +14,15 @@ import { setAuthToken, setRefreshToken, setCurrentFarmId } from '@/lib/trpc';
 export default function LoginPage() {
   const t = useTranslations('auth');
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Store tokens
       setAuthToken(data.accessToken);
       setRefreshToken(data.refreshToken);
@@ -28,14 +30,19 @@ export default function LoginPage() {
       // Store user data
       localStorage.setItem('user', JSON.stringify(data.user));
       
-      // Get user's farms and set the first one as current
-      // In a real app, you'd fetch farms list first
-      // For now, redirect to dashboard
-      router.push('/dashboard');
+      // Store farm ID if user has a farm
+      if (data.farm) {
+        setCurrentFarmId(data.farm.id);
+      }
+      
+      // Redirect to dashboard with locale
+      router.push(`/${locale}/dashboard`);
     },
     onError: (err) => {
-      setError(t('invalidCredentials'));
-      console.error('Login failed:', err);
+      console.error('Login failed - Full error:', err);
+      console.error('Error message:', err.message);
+      console.error('Error data:', err.data);
+      setError(err.message || t('invalidCredentials'));
     },
   });
 
@@ -120,7 +127,7 @@ export default function LoginPage() {
       {/* Register link */}
       <div className="mt-6 text-center text-sm text-gray-600">
         {t('noAccount')}{' '}
-        <a href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+        <a href={`/${locale}/register`} className="text-primary-600 hover:text-primary-700 font-medium">
           {t('register')}
         </a>
       </div>

@@ -249,6 +249,110 @@ export const breedingRouter = router({
             where: { id: input.cycleId },
             data: { status: 'LAMBED' },
           });
+
+          // Create lamb animals automatically with user-provided details
+          if (input.payload) {
+            const payload = input.payload as any;
+            const lambingDate = input.date;
+            const lambsData = payload.lambs || [];
+
+            // Get the breeding cycle to find sire information
+            const cycle = await ctx.prisma.breedingCycle.findUnique({
+              where: { id: input.cycleId },
+              include: {
+                events: {
+                  where: {
+                    type: { in: ['INS1', 'INS2'] },
+                  },
+                  orderBy: { date: 'desc' },
+                  take: 1,
+                },
+              },
+            });
+
+            // Get sire ID from the insemination event payload if available
+            let sireId: string | undefined = undefined;
+            if (cycle?.events[0]?.payload) {
+              const insPayload = cycle.events[0].payload as any;
+              sireId = insPayload.ramId;
+            }
+
+            // Create lamb animals for live lambs (with tag numbers)
+            const createdLambs = [];
+            for (const lambData of lambsData) {
+              // Skip stillborn lambs - they don't get created as animals
+              if (lambData.isStillborn) {
+                continue;
+              }
+
+              // Validate tag number
+              if (!lambData.tagNumber || lambData.tagNumber.trim() === '') {
+                throw new TRPCError({
+                  code: 'BAD_REQUEST',
+                  message: 'All live lambs must have a tag number',
+                });
+              }
+
+              const tagNumber = lambData.tagNumber.trim();
+
+              // Check if tag number already exists
+              const existing = await ctx.prisma.animal.findUnique({
+                where: {
+                  farmId_tagNumber: {
+                    farmId: input.farmId,
+                    tagNumber: tagNumber,
+                  },
+                },
+              });
+
+              if (existing) {
+                throw new TRPCError({
+                  code: 'CONFLICT',
+                  message: `Tag number ${tagNumber} already exists`,
+                });
+              }
+
+              // Create the lamb animal
+              const lamb = await ctx.prisma.animal.create({
+                data: {
+                  farmId: input.farmId,
+                  tagNumber: tagNumber,
+                  type: 'LAMB',
+                  sex: lambData.sex,
+                  status: 'ACTIVE',
+                  dob: lambingDate,
+                  damId: input.eweId,
+                  sireId: sireId,
+                },
+              });
+              createdLambs.push(lamb);
+
+              // Log audit for each lamb
+              await ctx.prisma.auditLog.create({
+                data: {
+                  userId: ctx.user.userId,
+                  farmId: input.farmId,
+                  action: 'CREATE_ANIMAL',
+                  entityType: 'Animal',
+                  entityId: lamb.id,
+                },
+              });
+            }
+
+            // Store created lamb IDs in the event payload
+            if (createdLambs.length > 0) {
+              await ctx.prisma.breedingEvent.update({
+                where: { id: event.id },
+                data: {
+                  payload: {
+                    ...payload,
+                    lambIds: createdLambs.map(l => l.id),
+                    lambTagNumbers: createdLambs.map(l => l.tagNumber),
+                  },
+                },
+              });
+            }
+          }
         } else if (input.type === 'ABORTION' || input.type === 'LOSS') {
           await ctx.prisma.breedingCycle.update({
             where: { id: input.cycleId },

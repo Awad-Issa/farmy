@@ -6,25 +6,44 @@
  */
 
 import { useTranslations } from 'next-intl';
-import { trpc } from '@/lib/trpc';
+import { trpc, getCurrentFarmId } from '@/lib/trpc';
 import { LayoutDashboard, PawPrint, Heart, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
+  const [farmId, setFarmId] = useState<string | null>(null);
 
-  // Fetch dashboard data (placeholder - will be implemented with actual API)
+  // Get farm ID from localStorage on mount
+  useEffect(() => {
+    const id = getCurrentFarmId();
+    setFarmId(id);
+  }, []);
+
+  // Fetch dashboard data
   const { data: stats, isLoading } = trpc.reports.dashboard.useQuery(
-    {},
-    {
-      // Mock data for now
-      enabled: false,
-    }
+    { farmId: farmId! },
+    { enabled: !!farmId }
   );
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-gray-500">{t('welcome')}...</div>
+      </div>
+    );
+  }
+
+  // Show message if no farm
+  if (!farmId) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="text-center max-w-md">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Farmy!</h2>
+          <p className="text-gray-600 mb-6">
+            It looks like you don't have a farm set up yet. Please contact support or create a farm to get started.
+          </p>
+        </div>
       </div>
     );
   }
@@ -42,7 +61,9 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-sm text-gray-600">{t('totalAnimals')}</p>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {stats?.herd?.total ?? 0}
+            </p>
           </div>
         </div>
 
@@ -53,7 +74,9 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-sm text-gray-600">{t('activeBreeding')}</p>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {stats?.herd?.pregnantEwes ?? 0}
+            </p>
           </div>
         </div>
 
@@ -64,7 +87,9 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-sm text-gray-600">{t('healthEvents')}</p>
-            <p className="text-2xl font-bold text-gray-900">0</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {stats?.herd?.recentlySick ?? 0}
+            </p>
           </div>
         </div>
 
@@ -75,7 +100,9 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-sm text-gray-600">Total Sales</p>
-            <p className="text-2xl font-bold text-gray-900">$0</p>
+            <p className="text-2xl font-bold text-gray-900">
+              ${stats?.sales?.totalRevenue?.toFixed(2) ?? '0.00'}
+            </p>
           </div>
         </div>
       </div>

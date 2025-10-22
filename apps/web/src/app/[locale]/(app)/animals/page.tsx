@@ -6,26 +6,41 @@
  */
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { trpc } from '@/lib/trpc';
+import { useState, useEffect } from 'react';
+import { trpc, getCurrentFarmId } from '@/lib/trpc';
 import { Plus, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { AddAnimalModal } from '@/components/AddAnimalModal';
 
 export default function AnimalsPage() {
   const t = useTranslations('animals');
+  const tCommon = useTranslations('common');
+  const params = useParams();
+  const locale = params.locale as string;
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [farmId, setFarmId] = useState<string | null>(null);
+
+  // Get farm ID on mount
+  useEffect(() => {
+    const id = getCurrentFarmId();
+    setFarmId(id);
+  }, []);
 
   // Fetch animals list
   const { data: animals, isLoading } = trpc.animals.list.useQuery(
     {
+      farmId: farmId!,
       q: searchQuery || undefined,
       limit: 50,
     },
-    {
-      // Mock for now
-      enabled: false,
-    }
+    { enabled: !!farmId }
   );
+
+  const handleAddAnimal = () => {
+    setIsAddModalOpen(true);
+  };
 
   return (
     <div>
@@ -33,7 +48,10 @@ export default function AnimalsPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
         
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          onClick={handleAddAnimal}
+          className="btn-primary flex items-center gap-2"
+        >
           <Plus className="w-5 h-5" />
           {t('addAnimal')}
         </button>
@@ -49,14 +67,14 @@ export default function AnimalsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('search') + '...'}
+              placeholder={tCommon('search') + '...'}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
             />
           </div>
 
           {/* Filter buttons */}
           <button className="btn-secondary">
-            Filter
+            {tCommon('filter')}
           </button>
         </div>
       </div>
@@ -77,29 +95,26 @@ export default function AnimalsPage() {
                   {t('type')}
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  {t('breed')}
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                   {t('gender')}
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
                   {t('status')}
                 </th>
                 <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
-                  Actions
+                  {tCommon('actions')}
                 </th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-gray-500">
+                  <td colSpan={6} className="text-center py-8 text-gray-500">
                     Loading...
                   </td>
                 </tr>
               ) : !animals || animals.items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-8 text-gray-500">
+                  <td colSpan={6} className="text-center py-8 text-gray-500">
                     No animals found. Add your first animal to get started.
                   </td>
                 </tr>
@@ -108,23 +123,20 @@ export default function AnimalsPage() {
                   <tr key={animal.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm">
                       <Link
-                        href={`/animals/${animal.id}`}
+                        href={`/${locale}/animals/${animal.id}`}
                         className="text-primary-600 hover:text-primary-700 font-medium"
                       >
                         {animal.tagNumber}
                       </Link>
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-900">
-                      {animal.rfid || '-'}
+                      {animal.rfid && animal.rfid !== 'null' ? animal.rfid : '-'}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-900">
                       {animal.type}
                     </td>
                     <td className="py-3 px-4 text-sm text-gray-900">
-                      {animal.breed || '-'}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-900">
-                      {animal.gender}
+                      {animal.sex}
                     </td>
                     <td className="py-3 px-4 text-sm">
                       <span
@@ -138,9 +150,12 @@ export default function AnimalsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-sm">
-                      <button className="text-primary-600 hover:text-primary-700">
+                      <Link
+                        href={`/${locale}/animals/${animal.id}`}
+                        className="text-primary-600 hover:text-primary-700 font-medium"
+                      >
                         View
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))
@@ -149,6 +164,15 @@ export default function AnimalsPage() {
           </table>
         </div>
       </div>
+
+      {/* Add Animal Modal */}
+      <AddAnimalModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={() => {
+          // Modal will auto-refresh the list
+        }}
+      />
     </div>
   );
 }

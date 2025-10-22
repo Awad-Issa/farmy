@@ -3,7 +3,7 @@
  */
 
 import { initTRPC, TRPCError } from '@trpc/server';
-import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
+import { type FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
 import superjson from 'superjson';
 import { prisma } from '@farmy/db';
 import { verifyAccessToken, type JWTPayload } from '@farmy/auth';
@@ -12,11 +12,11 @@ import { verifyAccessToken, type JWTPayload } from '@farmy/auth';
  * Create context for tRPC procedures
  * Context is created for each request
  */
-export async function createTRPCContext(opts: CreateNextContextOptions) {
+export async function createTRPCContext(opts: FetchCreateContextFnOptions) {
   const { req } = opts;
 
   // Extract token from Authorization header
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.get('authorization');
   const token = authHeader?.startsWith('Bearer ')
     ? authHeader.slice(7)
     : null;
@@ -28,10 +28,7 @@ export async function createTRPCContext(opts: CreateNextContextOptions) {
   }
 
   // Get farmId from header (for multi-farm support)
-  const farmId =
-    typeof req.headers['x-farm-id'] === 'string'
-      ? req.headers['x-farm-id']
-      : null;
+  const farmId = req.headers.get('x-farm-id');
 
   return {
     prisma,
@@ -47,7 +44,7 @@ export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
  * Initialize tRPC with context
  */
 const t = initTRPC.context<Context>().create({
-  transformer: superjson,
+  // transformer: superjson, // Temporarily disabled to debug
   errorFormatter({ shape }) {
     return shape;
   },

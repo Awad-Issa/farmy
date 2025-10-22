@@ -6,6 +6,9 @@
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter, createTRPCContext } from '@farmy/api';
 
+// Force Node.js runtime (required for native modules like argon2)
+export const runtime = 'nodejs';
+
 const handler = (req: Request) =>
   fetchRequestHandler({
     endpoint: '/api/trpc',

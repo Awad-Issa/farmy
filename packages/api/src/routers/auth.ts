@@ -58,6 +58,25 @@ export const authRouter = router({
         },
       });
 
+      // Create default farm for new user
+      const farmName = input.name ? `${input.name}'s Farm` : 'My Farm';
+      const farm = await ctx.prisma.farm.create({
+        data: {
+          name: farmName,
+          ownerId: user.id,
+          settings: {},
+        },
+      });
+
+      // Add user as owner of the farm
+      await ctx.prisma.farmMember.create({
+        data: {
+          farmId: farm.id,
+          userId: user.id,
+          role: 'OWNER',
+        },
+      });
+
       // Generate tokens
       const tokenId = generateTokenId();
       const accessToken = signAccessToken({
@@ -86,6 +105,10 @@ export const authRouter = router({
           id: user.id,
           phone: user.phone,
           name: user.name,
+        },
+        farm: {
+          id: farm.id,
+          name: farm.name,
         },
         accessToken,
         refreshToken,
@@ -143,12 +166,23 @@ export const authRouter = router({
         },
       });
 
+      // Get user's first farm (if any)
+      const farmMember = await ctx.prisma.farmMember.findFirst({
+        where: { userId: user.id },
+        include: { farm: true },
+        orderBy: { joinedAt: 'asc' },
+      });
+
       return {
         user: {
           id: user.id,
           phone: user.phone,
           name: user.name,
         },
+        farm: farmMember ? {
+          id: farmMember.farm.id,
+          name: farmMember.farm.name,
+        } : null,
         accessToken,
         refreshToken,
       };

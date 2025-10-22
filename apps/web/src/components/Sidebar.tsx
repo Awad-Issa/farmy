@@ -42,9 +42,12 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Extract locale from pathname
+  const locale = pathname.split('/')[1] || 'en';
+
   const handleLogout = () => {
     clearAuth();
-    router.push('/login');
+    router.push(`/${locale}/login`);
   };
 
   return (
@@ -58,23 +61,24 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const fullPath = `/${locale}${item.href}`;
+          const isActive = pathname === fullPath;
           
           return (
             <a
               key={item.key}
-              href={item.href}
+              href={fullPath}
               className={`
                 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
                 ${
                   isActive
                     ? 'bg-primary-50 text-primary-700 font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-gray-900 hover:bg-gray-50 hover:text-gray-900'
                 }
               `}
             >
               <Icon className="w-5 h-5" />
-              <span>{t(item.key)}</span>
+              <span className="text-sm">{t(item.key)}</span>
             </a>
           );
         })}
@@ -84,7 +88,7 @@ export function Sidebar() {
       <div className="p-4 border-t border-gray-200">
         <button
           onClick={handleLogout}
-          className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+          className="w-full text-left px-4 py-3 text-gray-900 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors text-sm"
         >
           {t('logout')}
         </button>

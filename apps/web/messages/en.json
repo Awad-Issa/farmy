@@ -23,15 +23,29 @@
     "logout": "Logout",
     "phone": "Phone Number",
     "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Name",
+    "optional": "optional",
     "rememberMe": "Remember Me",
     "forgotPassword": "Forgot Password?",
     "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
     "register": "Register",
     "loginTitle": "Welcome to Farmy",
     "loginSubtitle": "Enter your credentials to access your farm",
+    "registerTitle": "Create Your Account",
+    "registerSubtitle": "Join Farmy and start managing your farm",
     "phoneRequired": "Phone number is required",
     "passwordRequired": "Password is required",
-    "invalidCredentials": "Invalid phone or password"
+    "phonePasswordRequired": "Phone and password are required",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "passwordMismatch": "Passwords do not match",
+    "invalidCredentials": "Invalid phone or password",
+    "registrationFailed": "Registration failed. Please try again.",
+    "phoneHint": "Enter your phone number with country code (e.g., +970)",
+    "passwordHint": "Minimum 8 characters",
+    "namePlaceholder": "Your name",
+    "loading": "Loading..."
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -46,7 +60,8 @@
     "insights": "Insights",
     "reports": "Reports",
     "settings": "Settings",
-    "ops": "Operations"
+    "ops": "Operations",
+    "logout": "Logout"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -74,6 +89,62 @@
       "weight": "Weight",
       "milk": "Milk",
       "sales": "Sales"
+    }
+  },
+  "breeding": {
+    "title": "Breeding Management",
+    "subtitle": "Track and manage breeding cycles",
+    "newCycle": "New Breeding Cycle",
+    "createCycle": "Create Breeding Cycle",
+    "selectEwe": "Select Ewe",
+    "ins1Date": "INS1 Date (First Insemination)",
+    "ins2Date": "INS2 Date (Second Insemination)",
+    "check1": "Check 1 (Pregnancy Check)",
+    "check2": "Check 2 (Confirmation)",
+    "estDueDate": "Estimated Due Date",
+    "status": {
+      "open": "Open",
+      "pregnant": "Pregnant",
+      "lambed": "Lambed",
+      "failed": "Failed",
+      "aborted": "Aborted"
+    },
+    "stats": {
+      "openCycles": "Open Cycles",
+      "pregnant": "Pregnant",
+      "lambed": "Lambed",
+      "totalCycles": "Total Cycles"
+    },
+    "filters": {
+      "all": "All",
+      "byStatus": "Filter by Status"
+    },
+    "actions": {
+      "viewDetails": "View Details",
+      "recordIns2": "Record INS2",
+      "recordLambing": "Record Lambing",
+      "updateStatus": "Update Status"
+    },
+    "empty": {
+      "title": "No breeding cycles found",
+      "subtitle": "Start tracking breeding cycles by creating your first one",
+      "filtered": "No cycles with this status"
+    },
+    "timeline": {
+      "expectedTimeline": "Expected Timeline",
+      "ins2": "INS2 (2nd Insemination)",
+      "check1": "CHECK1 (Pregnancy Check)",
+      "estDue": "Est. Due Date (if pregnant)",
+      "daysLeft": "days left",
+      "daysOverdue": "days overdue"
+    },
+    "info": {
+      "ins1Description": "INS1 is the first insemination date. The system will automatically:",
+      "autoReminders": [
+        "Create a reminder for INS2 at +17 days",
+        "Create a reminder for CHECK1 at +28 days",
+        "Track the breeding cycle status"
+      ]
     }
   },
   "settings": {
